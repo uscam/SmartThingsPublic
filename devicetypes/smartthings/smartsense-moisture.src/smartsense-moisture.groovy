@@ -91,6 +91,11 @@ def parse(String description) {
 	return result
 }
 
+def installed() {
+	// Device-Watch simply pings if no device events received for 482min(checkInterval)
+	sendEvent(name: "checkInterval", value: 2 * 4 * 60 * 60 + 2 * 60, displayed: false, data: [protocol: "zwave", hubHardwareId: device.hub.hardwareID])
+}
+
 def updated() {
 	// Device-Watch simply pings if no device events received for 482min(checkInterval)
 	sendEvent(name: "checkInterval", value: 2 * 4 * 60 * 60 + 2 * 60, displayed: false, data: [protocol: "zwave", hubHardwareId: device.hub.hardwareID])
@@ -161,6 +166,15 @@ def zwaveEvent(physicalgraph.zwave.commands.sensormultilevelv5.SensorMultilevelR
         }
         map.unit = location.temperatureScale
 	}
+	map
+}
+
+def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicSet cmd)
+{
+	def map = [:]
+	map.name = "water"
+	map.value = cmd.value ? "wet" : "dry"
+	map.descriptionText = "${device.displayName} is ${map.value}"
 	map
 }
 
